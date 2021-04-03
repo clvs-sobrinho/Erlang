@@ -42,7 +42,7 @@ def ErlangB(Servers, Intensity):
             b = (val * last) / (count + (val * last))
             last = b
         return MinMax(b)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -64,7 +64,7 @@ def ErlangBExt(Servers, Intensity, Retry):
             b = (val * last * attempts) / (count + (val * last * attempts))
             last = b
         return MinMax(b)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -86,7 +86,7 @@ def EngsetB(Servers, Events, Intensity):
             return 0
         else:
             return MinMax((1 / b))
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -98,7 +98,7 @@ def ErlangC(Servers, Intensity):
         b = ErlangB(Servers, Intensity)
         c = b / (((Intensity / Servers) * b) + (1 - (Intensity / Servers)))
         return MinMax(c)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -117,7 +117,7 @@ def NBTrunks(Intensity, Blocking):
                 break
         if sngcount == maxiterate:
             return 0
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -134,7 +134,7 @@ def NumberTrunks(Servers, Intensity):
             if b < 0.001:
                 return count
                 break
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -153,7 +153,7 @@ def Servers(Blocking, Intensity):
             b = (val * last) / (count + (val * last))
             last = b
         return count
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -178,7 +178,7 @@ def LoopingTraffic(Trunks, Blocking, Increment, MaxIntensity, MinIntensity):
             Intensity += inc
             LoopNo += 1
         return MinI
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -200,7 +200,7 @@ def Traffic(Servers, Blocking):
         while inc <= maxiterate / 100:
             inc *= 10
         return LoopingTraffic(trunks, Blocking, inc, maxiterate, 0)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -215,7 +215,7 @@ def Abandon(Agents, AbandonTime, CallsPerHour, AHT):
         c = ErlangC(server, trafficrate)
         aband = c * math.exp((trafficrate - server) * (AbandonTime / AHT))
         return MinMax(aband)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -249,7 +249,7 @@ def Agents(SLA, ServiceTime, CallsPerHour, AHT):
                     return agents
                     break
             agents += 1
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -277,7 +277,7 @@ def AgentsASA(ASA, CallsPerHour, AHT):
                 return agents
                 break
             agents += 1
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -293,7 +293,7 @@ def ASA(Agents, CallsPerHour, AHT):
         c = ErlangC(server, trafficrate)
         answertime = c / (server * deathrate * (1 - utilisation))
         return int(answertime * TIMEINTERVAL + 0.5)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -312,7 +312,7 @@ def NBAgents(CallsPerHour, avgSA, AHT):
                 break
         if sngcount == maxiterate:
             return 0
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -327,7 +327,7 @@ def CallCapacity(NoAgents, SLA, ServiceTime, AHT):
             calls -= 1
             agent = Agents(SLA, ServiceTime, calls, AHT)
         return calls
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -366,7 +366,7 @@ def FractionalAgents(SLA, ServiceTime, CallsPerHour, AHT):
             fract = sla - lastslq
             agentssng = (fract / oneagent) + (agents - 1)
         return agentssng
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -381,7 +381,7 @@ def FractionalCallCapacity(NoAgents, SLA, ServiceTime, AHT):
             calls -= 1
             xagent = FractionalAgents(SLA, ServiceTime, calls, AHT)
         return calls
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -395,7 +395,7 @@ def Queued(Agents, CallsPerHour, AHT):
         server = Agents
         q = ErlangC(server, trafficrate)
         return MinMax(q)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -411,7 +411,7 @@ def QueueSize(Agents, CallsPerhour, AHT):
         c = ErlangC(server, trafficrate)
         qsize = utilisation * c / (1 - utilisation)
         return int(qsize + 0.5)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -426,7 +426,7 @@ def QueueTime(Agents, CallsPerHour, AHT):
         utilisation = trafficrate / server if trafficrate < server else 0.99
         qtime = 1 / (server * deathrate * (1 - utilisation))
         return int(qtime * TIMEINTERVAL + 0.5)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -445,7 +445,7 @@ def ServiceTime(NoAgents, SLA, CallsPerHour, AHT):
         ag = Agents(SLA, int(stime), CallsPerHour, AHT)
         adjust = 0 if ag == NoAgents else 1
         return int(stime + adjust)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -460,7 +460,7 @@ def SLA(Agents, ServiceTime, CallsPerHour, AHT):
         c = ErlangC(server, trafficrate)
         slqueued = 1 - c * math.exp((trafficrate - server) * ServiceTime / AHT)
         return MinMax(slqueued)
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -480,7 +480,7 @@ def Trunks(Agents, CallsPerHour, AHT):
         ntrunks = NumberTrunks(server, r)
         trunks = 1 if ntrunks < 1 and trafficrate > 0 else ntrunks
         return trunks
-    except:
+    except ValueError as error:
         return 0
 
 
@@ -494,7 +494,7 @@ def Utilisation(Agents, CallsPerHour, AHT):
         trafficrate = birthrate / deathrate
         utilisation = trafficrate / Agents
         return MinMax(utilisation)
-    except:
+    except ValueError as error:
         return 0
 
 
